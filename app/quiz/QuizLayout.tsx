@@ -29,20 +29,20 @@ function QuizLayoutContent({ variationKey, children }: QuizLayoutProps) {
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }, [variation.utmValue, pathname, router, searchParams]);
 
-  return (
-    <main className={styles.container}>
-      <section className={styles.header}>
-        <div className={styles.headerContent}>
-          <p className={styles.badge}>Teste 60 segundos</p>
-          <h1 className={styles.headline}>{variation.headline}</h1>
-          <p className={styles.subheadline}>{variation.subheadline}</p>
-          <div className={styles.headerCta}>
-            <a className={styles.primaryButton} href="#quiz" data-variation={variation.utmValue}>
-              {variation.ctaLabel}
-            </a>
-          </div>
-        </div>
-      </section>
+      return (
+        <main className={styles.container}>
+          <section className={styles.header}>
+            <div className={styles.headerContent}>
+              <p className={styles.badge}>Teste 60 segundos</p>
+              <h1 className={styles.headline}>{variation.headline}</h1>
+              <p className={styles.subheadline}>{variation.subheadline}</p>
+              <div className={styles.headerCta}>
+                <a className={styles.primaryButton} href="#quiz" data-variation={variation.utmValue}>
+                  {variation.ctaLabel}
+                </a>
+              </div>
+            </div>
+          </section>
       <section id="quiz" className={styles.quizSection}>
         {children}
       </section>
