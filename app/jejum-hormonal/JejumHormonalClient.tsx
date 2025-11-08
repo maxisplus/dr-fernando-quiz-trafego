@@ -319,35 +319,23 @@ export function JejumHormonalClient() {
         </div>
       </section>
 
-      {/* Benefits Carousel */}
+      {/* Benefits Grid */}
       <section className={`${styles.section} ${styles.benefits}`}>
         <h2 className={styles.sectionTitle}>
           Quando seus hormônios mudam, <span className={styles.highlight}>tudo muda.</span>
         </h2>
         
-        <div className={styles.benefitCarousel}>
+        <div className={styles.benefitsGrid}>
           {benefits.map((benefit, index) => (
             <div
               key={index}
-              className={`${styles.benefitCard} ${
-                index === currentBenefit ? styles.activeBenefit : ''
-              }`}
+              className={styles.benefitCard}
             >
               <div className={styles.benefitIcon}>{benefit.icon}</div>
               <h4>{benefit.title}</h4>
               <p>{benefit.subtitle}</p>
+              <div className={styles.cardShine}></div>
             </div>
-          ))}
-        </div>
-
-        <div className={styles.carouselDots}>
-          {benefits.map((_, index) => (
-            <button
-              key={index}
-              className={`${styles.dot} ${index === currentBenefit ? styles.activeDot : ''}`}
-              onClick={() => setCurrentBenefit(index)}
-              aria-label={`Ir para benefício ${index + 1}`}
-            />
           ))}
         </div>
 
