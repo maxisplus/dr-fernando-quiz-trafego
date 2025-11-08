@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, Suspense } from 'react';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import styles from './quiz.module.css';
 import { getQuizVariation, QuizVariationKey } from './quizConfig';
@@ -10,7 +10,7 @@ interface QuizLayoutProps {
   children: ReactNode;
 }
 
-export function QuizLayout({ variationKey, children }: QuizLayoutProps) {
+function QuizLayoutContent({ variationKey, children }: QuizLayoutProps) {
   const variation = getQuizVariation(variationKey);
   const router = useRouter();
   const pathname = usePathname();
@@ -50,3 +50,20 @@ export function QuizLayout({ variationKey, children }: QuizLayoutProps) {
   );
 }
 
+export function QuizLayout({ variationKey, children }: QuizLayoutProps) {
+  return (
+    <Suspense fallback={
+      <main className={styles.container}>
+        <section className={styles.header}>
+          <div className={styles.headerContent}>
+            <p className={styles.badge}>Carregando...</p>
+          </div>
+        </section>
+      </main>
+    }>
+      <QuizLayoutContent variationKey={variationKey}>
+        {children}
+      </QuizLayoutContent>
+    </Suspense>
+  );
+}
