@@ -43,64 +43,97 @@ export function HomeClient() {
     <main className={styles.homePage}>
       {/* Hero Principal */}
       <section className={styles.heroMain}>
-        <div className={styles.heroContent}>
+        <div className={styles.heroLayout}>
+          <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
-            O médico que fez mais de <span className={styles.highlight}>10 mil mulheres</span> voltarem a emagrecer com saúde depois dos 40.
+            <span className={styles.heroLine}>O médico que fez</span>
+            <span className={styles.heroLine}>mais de <span className={styles.highlight}>10 mil</span></span>
+            <span className={styles.heroLine}><span className={styles.highlight}>mulheres</span> voltarem a</span>
+            <span className={styles.heroLine}>emagrecer com</span>
+            <span className={styles.heroLine}>saúde <span className={styles.highlightAlt}>depois dos 40.</span></span>
           </h1>
           <p className={styles.heroSubtitle}>
-            <strong>Dr. Fernando Del Piero</strong> — referência nacional em emagrecimento feminino. 
+            <strong>Dr. Fernando Del Piero</strong> — referência nacional em emagrecimento feminino.<br />
             Unindo ciência e acompanhamento personalizado em protocolos desenhados para o metabolismo da mulher.
           </p>
-          <div className={styles.heroActions}>
-            <Link href="#consulta" className={styles.ctaPrimary}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <div className={styles.heroActions}>
+              <Link className={styles.ctaSecondary} href="#quiz">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span>Fazer autoavaliação</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Seção Conteúdo YouTube */}
+      <section className={`${styles.section} ${styles.youtubeSection}`}>
+        <div className={styles.youtubeCard}>
+          <div className={styles.youtubeContent}>
+            <div className={styles.youtubeHeader}>
+              <svg className={styles.youtubeIcon} viewBox="0 0 24 24" fill="currentColor">
+                <rect x="4" y="4" width="16" height="16" rx="2" />
               </svg>
-              <span>Agendar Análise Metabólica</span>
-            </Link>
-            <Link href="/a" className={styles.ctaSecondary}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              <h2>Vídeo Exclusivo</h2>
+            </div>
+            <p className={styles.youtubeDescription}>
+              O protocolo que <strong>ACELERA</strong> o metabolismo e <strong>DESTRAVA</strong> o emagrecimento
+            </p>
+          </div>
+          <div className={styles.youtubeAction}>
+            <Link
+              href="https://www.youtube.com/@drfernandodelpiero"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.youtubeCta}
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 15l5.19-3L10 9z" />
+                <path d="M21.8 8s-.2-1.4-.82-2.02c-.78-.82-1.66-.82-2.06-.87C16.32 5 12 5 12 5h-.02s-4.32 0-6.9.11c-.4.05-1.28.05-2.06.87C2.4 6.6 2.2 8 2.2 8S2 9.68 2 11.35v1.3C2 14.32 2.2 16 2.2 16s.2 1.4.82 2.02c.78.82 1.8.8 2.26.89 1.64.16 6.74.21 6.74.21s4.32-.01 6.9-.12c.4-.05 1.28-.05 2.06-.87.62-.62.82-2.02.82-2.02s.2-1.68.2-3.35v-1.3C22 9.68 21.8 8 21.8 8z" />
               </svg>
-              <span>Fazer autoavaliação</span>
+              Assistir no YouTube
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Seção Consulta de Análise Metabólica */}
-      <section id="consulta" className={styles.sectionConsulta}>
-        <div className={styles.sectionBadge}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-          </svg>
-          <span>CONSULTA DE ANÁLISE METABÓLICA</span>
-        </div>
-        
-        <h2 className={styles.sectionTitle}>
-          A consulta que revela o que está <span className={styles.highlight}>impedindo o seu corpo de emagrecer.</span>
-        </h2>
-        
-        <p className={styles.sectionDescription}>
-          Um atendimento médico individual com o Dr. Fernando Del Piero — referência nacional em emagrecimento feminino e autor do <strong>Jejum Hormonal®</strong>. 
-          Nesta consulta, o objetivo é decifrar o metabolismo da mulher, identificar as travas hormonais e metabólicas e construir o plano certo antes de qualquer intervenção.
-        </p>
-        
-        <p className={styles.sectionMicro}>
-          É o ponto de partida para um tratamento realmente eficaz — baseado em ciência, tecnologia e acompanhamento médico personalizado.
-        </p>
-
-        <div className={styles.consultaActions}>
-          <Link href={whatsappLink} target="_blank" rel="noopener noreferrer" className={styles.ctaPrimary}>
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+      {/* Consulta Presencial e Online */}
+      <section className={`${styles.section} ${styles.sectionConsulta}`}>
+        <header className={styles.sectionHeader}>
+          <div className={styles.sectionBadge}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            <span>Agendar minha Análise Metabólica</span>
-          </Link>
-          <Link href="/a" className={styles.ctaSecondary}>
-            Fazer minha autoavaliação antes da consulta
-          </Link>
-        </div>
+            <span>CONSULTA DE ANÁLISE METABÓLICA</span>
+          </div>
+          
+          <h2 className={styles.sectionTitle}>
+            A consulta que revela o que está <span className={styles.highlight}>impedindo o seu corpo de emagrecer.</span>
+          </h2>
+          
+          <p className={styles.sectionDescription}>
+            Um atendimento médico individual com o Dr. Fernando Del Piero — referência nacional em emagrecimento feminino e autor do <strong>Jejum Hormonal®</strong>. 
+            Nesta consulta, o objetivo é decifrar o metabolismo da mulher, identificar as travas hormonais e metabólicas e construir o plano certo antes de qualquer intervenção.
+          </p>
+          
+          <p className={styles.sectionMicro}>
+            É o ponto de partida para um tratamento realmente eficaz — baseado em ciência, tecnologia e acompanhamento médico personalizado.
+          </p>
+
+          <div className={styles.consultaActions}>
+            <Link href={whatsappLink} target="_blank" rel="noopener noreferrer" className={styles.ctaPrimary}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              </svg>
+              <span>Agendar minha Análise Metabólica</span>
+            </Link>
+            <Link href="/a" className={styles.ctaSecondary}>
+              Fazer minha autoavaliação antes da consulta
+            </Link>
+          </div>
+        </header>
       </section>
 
       {/* Por que não emagrece */}

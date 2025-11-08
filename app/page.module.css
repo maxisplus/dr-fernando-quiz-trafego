@@ -8,18 +8,23 @@
 /* Hero Main */
 .heroMain {
   position: relative;
-  padding: 8rem 1.5rem 6rem;
-  text-align: center;
+  padding: 8rem max(3rem, 5vw) 6rem;
   min-height: 85vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background-image: url('/banner-sembg-desktop.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   animation: fadeInUp 0.8s ease-out;
   overflow: hidden;
+}
+
+.heroLayout {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: clamp(2rem, 4vw, 3rem);
 }
 
 
@@ -36,22 +41,47 @@
 
 .heroContent {
   position: relative;
-  max-width: 900px;
-  margin: clamp(5rem, 18vh, 12rem) auto 0;
+  max-width: 750px;
+  margin: clamp(6rem, 20vh, 14rem) 0 0;
+  text-align: left;
 }
 
 .heroTitle {
-  font-size: clamp(2.25rem, 5vw, 4rem);
+  font-size: clamp(2.5rem, 5.5vw, 4.5rem);
   font-weight: 900;
-  line-height: 1.2;
+  line-height: 1.25;
   color: var(--color-text);
-  margin: 0 0 2rem;
+  margin: 0 0 2.5rem;
+  letter-spacing: -0.02em;
+  width: 100%;
+}
+
+.heroLine {
+  display: block;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .heroTitle {
+    display: block;
+    max-width: 100%;
+  }
+  
+  .heroLine {
+    display: inline;
+  }
 }
 
 .highlight {
   color: var(--color-primary);
   position: relative;
   animation: colorPulse 3s ease-in-out infinite;
+  display: inline-block;
+}
+
+.highlightAlt {
+  color: var(--color-primary);
+  display: inline-block;
 }
 
 @keyframes colorPulse {
@@ -60,13 +90,12 @@
 }
 
 .heroSubtitle {
-  font-size: clamp(1.125rem, 2.5vw, 1.375rem);
-  line-height: 1.7;
+  font-size: clamp(1.125rem, 1.75vw, 1.25rem);
+  line-height: 1.8;
   color: var(--color-text-soft);
-  margin: 0 0 3rem;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 0 2.5rem;
+  max-width: 580px;
+  font-weight: 400;
 }
 
 .heroSubtitle strong {
@@ -76,9 +105,10 @@
 
 .heroActions {
   display: flex;
-  gap: 1.5rem;
-  justify-content: center;
+  gap: 1rem;
+  justify-content: flex-start;
   flex-wrap: wrap;
+  margin-top: 3rem;
 }
 
 /* CTAs */
@@ -150,6 +180,108 @@
 .ctaSecondary svg {
   width: 24px;
   height: 24px;
+}
+
+/* YouTube Section */
+.youtubeSection {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding: 0;
+}
+
+.youtubeCard {
+  position: relative;
+  padding: clamp(2rem, 4vw, 3rem);
+  background: linear-gradient(135deg, rgba(255, 129, 115, 0.95) 0%, rgba(255, 144, 131, 0.92) 100%);
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1.75rem;
+  width: 100%;
+}
+
+.youtubeContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.youtubeHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.youtubeIcon {
+  width: 32px;
+  height: 32px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.youtubeCard h2 {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 800;
+  color: white;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.youtubeDescription {
+  font-size: clamp(1rem, 1.5vw, 1.125rem);
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 720px;
+}
+
+.youtubeDescription strong {
+  font-weight: 900;
+  color: white;
+}
+
+.youtubeAction {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.youtubeCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1.75rem;
+  border-radius: 999px;
+  background: white;
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  white-space: nowrap;
+}
+
+.youtubeCta svg {
+  width: 20px;
+  height: 20px;
+}
+
+.youtubeCta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
 }
 
 /* Section Consulta */
@@ -572,16 +704,35 @@
     padding: 5rem 1rem 4rem;
     min-height: 90vh;
     background-image: url('/banner-sembg-mobile.png');
-    background-size: contain;
-    background-position: top center;
+    background-size: 105%;
+    background-position: center -80px;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .heroLayout {
+    align-items: center;
   }
 
   .heroTitle {
-    font-size: 2rem;
+    font-size: clamp(1.8rem, 6vw, 2.2rem);
+    text-align: center;
   }
 
   .heroContent {
-    margin: clamp(7rem, 24vh, 14rem) auto 0;
+    margin: clamp(18rem, 46vh, 26rem) auto 0;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .heroSubtitle {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-text-soft);
+    max-width: 92%;
+    margin: 0 auto 2.75rem;
   }
 
   .heroActions,
@@ -589,9 +740,14 @@
   .finalActions {
     flex-direction: column;
     width: 100%;
+    justify-content: center;
+    align-items: center;
   }
 
-  .ctaPrimary,
+  .ctaPrimary {
+    display: none;
+  }
+
   .ctaSecondary {
     width: 100%;
     justify-content: center;
@@ -613,5 +769,33 @@
   .sectionOnline,
   .sectionFinal {
     padding: 3rem 1.5rem;
+  }
+
+  .youtubeCard {
+    padding: 2rem 1.5rem;
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+
+  .youtubeContent {
+    align-items: center;
+  }
+
+  .youtubeHeader {
+    justify-content: center;
+  }
+
+  .youtubeCard h2 {
+    font-size: 1.5rem;
+  }
+
+  .youtubeDescription {
+    font-size: 1rem;
+  }
+
+  .youtubeCta {
+    width: 100%;
+    justify-content: center;
   }
 }
