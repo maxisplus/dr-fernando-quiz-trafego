@@ -56,6 +56,32 @@ export function LipedemaClient() {
 
   return (
     <main className={styles.page}>
+      {/* VSL Section */}
+      <section id="video" className={`${styles.section} ${styles.vsl}`}>
+        <h2 className={styles.sectionTitle}>
+          Antes de tentar <span className={styles.highlight}>lipo, drenagem ou remédio…</span>
+          <br />
+          Assista isso agora.
+        </h2>
+        <div className={styles.videoWrapper}>
+          <div className={styles.videoPlaceholder}>
+            <svg className={styles.playIcon} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            <span>Vídeo sobre Lipedema</span>
+          </div>
+        </div>
+        <p className={styles.supportText}>
+          Mulheres com lipedema <span className={styles.highlight}>não falham</span> nas dietas. As dietas é que <span className={styles.highlight}>falham com elas.</span>
+        </p>
+        <Link className={styles.ctaPrimary} href={whatsappLink} target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          <span>QUERO FALAR COM A EQUIPE</span>
+        </Link>
+      </section>
+
       {/* Hero Section */}
       <section className={`${styles.section} ${styles.hero}`}>
         <div className={styles.heroContent}>
@@ -65,7 +91,7 @@ export function LipedemaClient() {
             </svg>
             <span>Lipedema tem tratamento</span>
           </div>
-          
+
           <h1 className={styles.headline}>
             Gordura no culote, pernas grossas, <span className={styles.highlight}>dor ao toque?</span>
             <br />
@@ -124,32 +150,6 @@ export function LipedemaClient() {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* VSL Section */}
-      <section id="video" className={`${styles.section} ${styles.vsl}`}>
-        <h2 className={styles.sectionTitle}>
-          Antes de tentar <span className={styles.highlight}>lipo, drenagem ou remédio…</span>
-          <br />
-          Assista isso agora.
-        </h2>
-        <div className={styles.videoWrapper}>
-          <div className={styles.videoPlaceholder}>
-            <svg className={styles.playIcon} viewBox="0 0 24 24" fill="currentColor">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            <span>Vídeo sobre Lipedema</span>
-          </div>
-        </div>
-        <p className={styles.supportText}>
-          Mulheres com lipedema <span className={styles.highlight}>não falham</span> nas dietas. As dietas é que <span className={styles.highlight}>falham com elas.</span>
-        </p>
-        <Link className={styles.ctaPrimary} href={whatsappLink} target="_blank" rel="noopener noreferrer">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
-          <span>QUERO FALAR COM A EQUIPE</span>
-        </Link>
       </section>
 
       {/* Causes Section with Carousel */}
