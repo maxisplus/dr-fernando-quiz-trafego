@@ -75,9 +75,6 @@ export function HomeClient() {
         <div className={styles.youtubeCard}>
           <div className={styles.youtubeContent}>
             <div className={styles.youtubeHeader}>
-              <svg className={styles.youtubeIcon} viewBox="0 0 24 24" fill="currentColor">
-                <rect x="4" y="4" width="16" height="16" rx="2" />
-              </svg>
               <h2>Vídeo Exclusivo</h2>
             </div>
             <p className={styles.youtubeDescription}>
@@ -91,10 +88,6 @@ export function HomeClient() {
               rel="noopener noreferrer"
               className={styles.youtubeCta}
             >
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 15l5.19-3L10 9z" />
-                <path d="M21.8 8s-.2-1.4-.82-2.02c-.78-.82-1.66-.82-2.06-.87C16.32 5 12 5 12 5h-.02s-4.32 0-6.9.11c-.4.05-1.28.05-2.06.87C2.4 6.6 2.2 8 2.2 8S2 9.68 2 11.35v1.3C2 14.32 2.2 16 2.2 16s.2 1.4.82 2.02c.78.82 1.8.8 2.26.89 1.64.16 6.74.21 6.74.21s4.32-.01 6.9-.12c.4-.05 1.28-.05 2.06-.87.62-.62.82-2.02.82-2.02s.2-1.68.2-3.35v-1.3C22 9.68 21.8 8 21.8 8z" />
-              </svg>
               Assistir no YouTube
             </Link>
           </div>
