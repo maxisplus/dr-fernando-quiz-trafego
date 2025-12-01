@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useWhatsappLink } from '../hooks/useWhatsappLink';
 import styles from './page.module.css';
 
 export function JejumHormonalClient() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
-  const [currentBenefit, setCurrentBenefit] = useState(0);
+  const [currentDeliverable, setCurrentDeliverable] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
   const whatsappLink = useWhatsappLink(
     'Olá! Quero falar com a equipe do Dr. Fernando.',
     'Olá! Acabei de fazer o quiz e recebi o resultado Mulher 40+ / Tríade. Quero saber como funciona o Jejum Hormonal.'
@@ -20,36 +21,80 @@ export function JejumHormonalClient() {
       rating: 5,
     },
     {
-      text: 'Não era preguiça. Era hormônio.',
+      text: 'Eu achava que era preguiça. Era hormônio.',
       author: 'Renata, 52 anos',
-      rating: 5,
-    },
-    {
-      text: 'Voltei a me sentir mulher.',
-      author: 'Ana, 55 anos',
-      rating: 5,
-    },
-    {
-      text: 'Perdi 12kg sem passar fome. O Dr. Fernando mudou minha vida.',
-      author: 'Juliana, 44 anos',
-      rating: 5,
-    },
-    {
-      text: 'Minha tireoide finalmente funciona. Energia que eu não tinha há anos.',
-      author: 'Patricia, 50 anos',
       rating: 5,
     },
   ];
 
   const benefits = [
-    { icon: '🍽️', title: 'Sem fome constante', subtitle: 'Leptina regulada' },
-    { icon: '🔥', title: 'Gordura responde', subtitle: 'Insulina equilibrada' },
-    { icon: '😴', title: 'Sono reparador', subtitle: 'Melatonina ativa' },
-    { icon: '⚡', title: 'Energia constante', subtitle: 'Tireoide funcionando' },
-    { icon: '💕', title: 'Libido de volta', subtitle: 'Testosterona ativa' },
-    { icon: '🧠', title: 'Foco e clareza', subtitle: 'Cortisol estável' },
-    { icon: '🌸', title: 'Sem TPM', subtitle: 'Progesterona equilibrada' },
-    { icon: '✨', title: 'Pele e cabelo', subtitle: 'Estrogênio ajustado' },
+    {
+      title: 'Adeus ao vício em doce e fome constante',
+      subtitle: 'Leptina volta a funcionar, saciedade reaparece',
+    },
+    {
+      title: 'Gordura localizada finalmente responde',
+      subtitle: 'Insulina regulada = menos acúmulo em abdômen e quadril',
+    },
+    {
+      title: 'Noites reparadoras voltam',
+      subtitle: 'Melatonina e cortisol entram em equilíbrio',
+    },
+    {
+      title: 'Energia o dia inteiro',
+      subtitle: 'Tireoide ativada, foco e disposição de volta',
+    },
+    {
+      title: 'Músculos firmes, libido acesa',
+      subtitle: 'Testosterona feminina em ação',
+    },
+    {
+      title: 'Cabeça leve, sem névoa mental',
+      subtitle: 'Cortisol estabiliza, humor volta ao eixo',
+    },
+    {
+      title: 'Corpo feminino em paz',
+      subtitle: 'Progesterona equilibrada = adeus TPM, secura e fogachos',
+    },
+    {
+      title: 'Beleza que vem de dentro',
+      subtitle: 'Estrogênio ajustado reflete na pele, cabelo e unhas',
+    },
+  ];
+
+  const deliverables = [
+    {
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+      ),
+      title: 'CONSULTA DE ANÁLISE METABÓLICA',
+      items: [
+        'Sessão individual com o Dr. Fernando',
+        'Scanner corporal 3D + bioimpedância (ou IA no online)',
+        'Investigação hormonal e metabólica completa',
+        'Mapeamento alimentar e emocional',
+        'Plano clínico inicial pronto para aplicar',
+      ],
+    },
+    {
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      title: 'JEJUM HORMONAL® EXPERIENCE',
+      items: [
+        'Consultas quinzenais com o Dr. Fernando',
+        'Estratégia alimentar personalizada',
+        'Dieta FMD adaptada para desbloquear gordura',
+        'Scanner 3D + Bioimpedância para medir progresso',
+        'Acompanhamento semanal com nutricionista',
+        'Canal VIP com o time',
+        'Acesso a terapias injetáveis (quando indicado)',
+      ],
+    },
   ];
 
   useEffect(() => {
@@ -57,24 +102,46 @@ export function JejumHormonalClient() {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
     }, 4000);
 
-    const benefitInterval = setInterval(() => {
-      setCurrentBenefit((prev) => (prev + 1) % benefits.length);
-    }, 3000);
-
     return () => {
       clearInterval(testimonialInterval);
-      clearInterval(benefitInterval);
     };
-  }, [testimonials.length, benefits.length]);
+  }, [testimonials.length]);
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const handleScroll = () => {
+      const scrollLeft = carousel.scrollLeft;
+      const cardWidth = carousel.clientWidth;
+      const currentIndex = Math.round(scrollLeft / cardWidth);
+      setCurrentDeliverable(currentIndex);
+    };
+
+    carousel.addEventListener('scroll', handleScroll);
+    return () => carousel.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const cardWidth = carousel.clientWidth;
+    carousel.scrollTo({
+      left: currentDeliverable * cardWidth,
+      behavior: 'smooth',
+    });
+  }, [currentDeliverable]);
+
 
   return (
     <main className={styles.page}>
       {/* VSL Section */}
       <section id="video" className={`${styles.section} ${styles.vsl}`}>
         <h2 className={styles.sectionTitle}>
-          Antes de tentar <span className={styles.highlight}>lipo, drenagem ou remédio…</span>
+          Antes de culpar seu corpo ou tentar mais uma dieta,
           <br />
-          Assista isso agora.
+          <span className={styles.highlight}>assista isso.</span>
         </h2>
         <div className={styles.videoWrapper}>
           <div className={styles.videoPlaceholder}>
@@ -91,7 +158,7 @@ export function JejumHormonalClient() {
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
           </svg>
-          <span>QUERO FALAR COM A EQUIPE</span>
+          <span>QUERO FALAR COM A EQUIPE DO DR. FERNANDO</span>
         </Link>
       </section>
 
@@ -106,7 +173,8 @@ export function JejumHormonalClient() {
           </div>
 
           <h1 className={styles.headline}>
-            Assista <span className={styles.highlight}>antes</span> de tentar mais uma dieta.
+            O motivo real por que{' '}
+            <span className={styles.highlight}>tantas mulheres 40+</span> travam no emagrecimento.
           </h1>
 
           <div className={styles.problemsList}>
@@ -114,24 +182,31 @@ export function JejumHormonalClient() {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <span>Cansaço constante</span>
+              <span>Cansaço constante.</span>
             </div>
             <div className={styles.problemItem}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <span>Libido em queda</span>
+              <span>Libido em queda.</span>
             </div>
             <div className={styles.problemItem}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-              <span>Corpo que não responde</span>
+              <span>E um corpo que simplesmente não emagrece.</span>
             </div>
           </div>
 
           <p className={styles.heroDescription}>
-            O problema <span className={styles.highlight}>não é você.</span> São os <span className={styles.highlightAlt}>8 hormônios</span> que controlam o emagrecimento feminino.
+            Não é falta de esforço — é desequilíbrio hormonal profundo.
+            <br />
+            <br />
+            Quando os 8 hormônios do emagrecimento feminino voltam a funcionar em ordem...
+            <br />
+            o corpo colabora.
+            <br />
+            E o emagrecimento acontece como consequência.
           </p>
 
           <Link className={styles.ctaPrimary} href="#video">
@@ -139,7 +214,7 @@ export function JejumHormonalClient() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>DESCOBRIR AGORA</span>
+            <span>QUERO ENTENDER SE É PARA MIM</span>
           </Link>
 
           <div className={styles.trustBadges}>
@@ -168,7 +243,9 @@ export function JejumHormonalClient() {
       {/* Testimonials Carousel */}
       <section className={`${styles.section} ${styles.testimonials}`}>
         <h2 className={styles.sectionTitle}>
-          Resultados <span className={styles.highlight}>reais.</span>
+          Elas pararam de se culpar.
+          <br />
+          <span className={styles.highlight}>E começaram a reprogramar o corpo.</span>
         </h2>
         
         <div className={styles.carouselWrapper}>
@@ -213,21 +290,13 @@ export function JejumHormonalClient() {
             </svg>
           </div>
           <h3 className={styles.authorityTitle}>Dr. Fernando Del Piero</h3>
-          <p className={styles.authorityRole}>Especialista em emagrecimento feminino 40+</p>
-          <div className={styles.authorityStats}>
-            <div className={styles.stat}>
-              <span className={styles.statNumber}>10.000+</span>
-              <span className={styles.statLabel}>Mulheres atendidas</span>
-            </div>
-            <div className={styles.stat}>
-              <span className={styles.statNumber}>15+</span>
-              <span className={styles.statLabel}>Anos de experiência</span>
-            </div>
-            <div className={styles.stat}>
-              <span className={styles.statNumber}>98%</span>
-              <span className={styles.statLabel}>Taxa de sucesso</span>
-            </div>
-          </div>
+          <p className={styles.authorityRole}>
+            Médico há 12 anos — referência em emagrecimento feminino 40+.
+            <br />
+            Mais de 10 mil mulheres acompanhadas presencial e online.
+            <br />
+            Protocolos baseados em ciência. Desenhados para o metabolismo da mulher.
+          </p>
         </div>
 
         <Link className={styles.ctaPrimary} href={whatsappLink} target="_blank" rel="noopener noreferrer">
@@ -241,104 +310,96 @@ export function JejumHormonalClient() {
       {/* Deliverables */}
       <section className={`${styles.section} ${styles.deliverables}`}>
         <h2 className={styles.sectionTitle}>
-          O que você <span className={styles.highlight}>recebe:</span>
+          O que você recebe no protocolo:
         </h2>
         <div className={styles.cardsGrid}>
-          <article className={styles.deliverableCard}>
-            <div className={styles.cardIcon}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
-            </div>
-            <h3>Análise Completa</h3>
-            <ul>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Consulta com Dr. Fernando</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Scanner 3D + bioimpedância</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Investigação hormonal completa</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Plano personalizado</span>
-              </li>
-            </ul>
-          </article>
-
-          <article className={styles.deliverableCard}>
-            <div className={styles.cardIcon}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3>Acompanhamento VIP</h3>
-            <ul>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Consultas quinzenais</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Estratégia alimentar personalizada</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Suporte semanal com nutricionista</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Canal direto com o time</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Terapias injetáveis (se indicado)</span>
-              </li>
-            </ul>
-          </article>
+          {deliverables.map((deliverable, index) => (
+            <article key={index} className={styles.deliverableCard}>
+              <div className={styles.cardIcon}>{deliverable.icon}</div>
+              <h3>{deliverable.title}</h3>
+              <ul>
+                {deliverable.items.map((item, itemIndex) => (
+                  <li key={itemIndex}>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                    </svg>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+        
+        {/* Carousel Mobile */}
+        <div className={styles.deliverablesCarouselWrapper}>
+          <div
+            ref={carouselRef}
+            className={styles.deliverablesCarousel}
+          >
+            {deliverables.map((deliverable, index) => (
+              <article
+                key={index}
+                className={`${styles.deliverableCard} ${styles.deliverableCardCarousel}`}
+              >
+                <div className={styles.cardIcon}>{deliverable.icon}</div>
+                <h3>{deliverable.title}</h3>
+                <ul>
+                  {deliverable.items.map((item, itemIndex) => (
+                    <li key={itemIndex}>
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                      </svg>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
+          
+          <div className={styles.carouselDots}>
+            {deliverables.map((_, index) => (
+              <button
+                key={index}
+                className={`${styles.dot} ${index === currentDeliverable ? styles.activeDot : ''}`}
+                onClick={() => setCurrentDeliverable(index)}
+                aria-label={`Ir para card ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Benefits Grid */}
       <section className={`${styles.section} ${styles.benefits}`}>
         <h2 className={styles.sectionTitle}>
-          Quando seus hormônios mudam, <span className={styles.highlight}>tudo muda.</span>
+          Eu quero que você recupere sua confiança.
         </h2>
-        
-        <div className={styles.benefitsGrid}>
+        <p className={styles.heroDescription}>
+          O problema nunca foi você.
+          <br />
+          Foram os métodos errados que você tentou.
+          <br />
+          Quando você respeita seus hormônios...
+          <br />
+          o corpo para de resistir e começa a colaborar.
+        </p>
+        <p className={styles.heroDescription}>
+          E quando isso acontece, tudo muda:
+        </p>
+        <div className={styles.benefitsSteps}>
           {benefits.map((benefit, index) => (
-            <div
-              key={index}
-              className={styles.benefitCard}
-            >
-              <div className={styles.benefitIcon}>{benefit.icon}</div>
-              <h4>{benefit.title}</h4>
-              <p>{benefit.subtitle}</p>
-              <div className={styles.cardShine}></div>
-            </div>
+            <article key={index} className={styles.benefitStep}>
+              <div className={styles.stepNumber}>
+                <span>{String(index + 1).padStart(2, '0')}</span>
+              </div>
+              <div className={styles.stepContent}>
+                <h4>{benefit.title}</h4>
+                <p>{benefit.subtitle}</p>
+              </div>
+              {index < benefits.length - 1 && <div className={styles.stepConnector} />}
+            </article>
           ))}
         </div>
 
@@ -346,14 +407,15 @@ export function JejumHormonalClient() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
-          <span>INICIAR AGORA</span>
+          <span>QUERO INICIAR MEU PROTOCOLO AGORA</span>
         </Link>
         
         <div className={styles.urgency}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          <span>Vagas limitadas. <strong>Apenas 5 vagas disponíveis esta semana.</strong></span>
+          <span>Atendimento presencial e online. <strong>Vagas limitadas.</strong></span>
         </div>
       </section>
     </main>

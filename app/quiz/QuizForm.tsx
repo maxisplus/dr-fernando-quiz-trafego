@@ -224,6 +224,10 @@ export function QuizForm({ variationKey }: QuizFormProps) {
   const currentQuestion = stepIndex === 0 ? undefined : questions[stepIndex - 1];
   const progress = Math.round(((stepIndex + Number(showResult)) / (questions.length + 1)) * 100);
   const resultType = showResult ? getResultType(answers) : null;
+  const currentResponse = currentQuestion ? answers[currentQuestion.id] : undefined;
+  const isNextDisabled =
+    stepIndex > 0 &&
+    (!currentResponse || (Array.isArray(currentResponse) && currentResponse.length === 0));
 
   const persistQuizSummary = useCallback(
     (result: QuizResultType) => {
@@ -309,6 +313,7 @@ export function QuizForm({ variationKey }: QuizFormProps) {
         <div className={styles.progressBar}>
           <span className={styles.progressFill} style={{ width: `${progress}%` }} />
         </div>
+        <span className={styles.progressValue}>{progress}% concluído</span>
       </div>
 
       {!showResult ? (
@@ -334,6 +339,9 @@ export function QuizForm({ variationKey }: QuizFormProps) {
                   Pergunta {stepIndex} de {questions.length}
                 </p>
                 <h2 className={styles.questionTitle}>{currentQuestion.title}</h2>
+                {currentQuestion.type === 'multiple' && (
+                  <p className={styles.questionHelper}>Você pode selecionar mais de uma opção.</p>
+                )}
                 {currentQuestion.description && <p className={styles.questionDescription}>{currentQuestion.description}</p>}
               </header>
               <div className={styles.optionsList}>
@@ -363,7 +371,12 @@ export function QuizForm({ variationKey }: QuizFormProps) {
                 >
                   Voltar
                 </button>
-                <button type="button" className={styles.primaryButton} onClick={handleNext}>
+                <button
+                  type="button"
+                  className={styles.primaryButton}
+                  onClick={handleNext}
+                  disabled={isNextDisabled}
+                >
                   {stepIndex === questions.length ? 'Ver resultado' : 'Continuar'}
                 </button>
               </div>

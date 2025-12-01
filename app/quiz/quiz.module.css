@@ -177,6 +177,17 @@
   transform: translateY(-2px) scale(1);
 }
 
+.primaryButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.primaryButton:disabled::before {
+  opacity: 0;
+}
+
 .secondaryButton {
   display: inline-flex;
   align-items: center;
@@ -200,6 +211,13 @@
   border-color: rgba(255, 129, 115, 0.4);
   transform: translateY(-2px);
   box-shadow: 0 12px 28px rgba(255, 129, 115, 0.15);
+}
+
+.secondaryButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
 }
 
 .quizSection {
@@ -263,6 +281,13 @@
   background: rgba(255, 129, 115, 0.12);
   overflow: hidden;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.progressValue {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  color: rgba(26, 14, 20, 0.6);
+  font-weight: 600;
 }
 
 .progressFill {
@@ -369,6 +394,12 @@
   font-weight: 800;
   line-height: 1.35;
   color: #1a0e14;
+}
+
+.questionHelper {
+  font-size: 0.9rem;
+  color: rgba(26, 14, 20, 0.6);
+  font-weight: 500;
 }
 
 .questionDescription {

@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useWhatsappLink } from '../hooks/useWhatsappLink';
 import styles from './page.module.css';
 
 export function LipedemaClient() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [currentDeliverable, setCurrentDeliverable] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
   const whatsappLink = useWhatsappLink(
     'Olá! Quero falar com a equipe do Dr. Fernando.',
     'Olá! Acabei de fazer o quiz e recebi indícios de Lipedema. Preciso de orientação personalizada.'
@@ -36,12 +38,44 @@ export function LipedemaClient() {
   ];
 
   const causes = [
-    { icon: '🔬', title: 'Estrogênio em excesso', description: 'Desequilíbrio hormonal' },
-    { icon: '🍬', title: 'Resistência à insulina', description: 'Metabolismo lento' },
-    { icon: '🔥', title: 'Inflamação crônica', description: 'Corpo inflamado' },
-    { icon: '🦠', title: 'Intestino desregulado', description: 'Disbiose intestinal' },
-    { icon: '😰', title: 'Cortisol alto', description: 'Estresse constante' },
-    { icon: '🧬', title: 'Genética ativada', description: 'Predisposição genética' },
+    { title: 'Estrogênio em excesso', description: 'Desequilíbrio hormonal' },
+    { title: 'Resistência à insulina', description: 'Metabolismo lento' },
+    { title: 'Inflamação crônica', description: 'Corpo inflamado' },
+    { title: 'Intestino desregulado', description: 'Disbiose intestinal' },
+    { title: 'Cortisol alto', description: 'Estresse constante' },
+    { title: 'Genética ativada', description: 'Predisposição genética' },
+  ];
+
+  const deliverables = [
+    {
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      ),
+      title: 'Consulta individual com Dr. Fernando',
+      items: [
+        'Análise corporal (3D ou online com IA)',
+        'Investigação hormonal completa',
+        'Mapeamento alimentar/emocional',
+        'Plano inicial aplicável',
+      ],
+    },
+    {
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      ),
+      title: 'Acompanhamento estratégico',
+      items: [
+        'Consultas quinzenais com o Dr. Fernando',
+        'Dieta FMD adaptada para Lipedema',
+        'Suporte semanal com nutricionista',
+        'Canal VIP com o time',
+        'Terapias injetáveis (se indicado)',
+      ],
+    },
   ];
 
   useEffect(() => {
@@ -53,6 +87,32 @@ export function LipedemaClient() {
       clearInterval(testimonialInterval);
     };
   }, [testimonials.length]);
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const handleScroll = () => {
+      const scrollLeft = carousel.scrollLeft;
+      const cardWidth = carousel.clientWidth;
+      const currentIndex = Math.round(scrollLeft / cardWidth);
+      setCurrentDeliverable(currentIndex);
+    };
+
+    carousel.addEventListener('scroll', handleScroll);
+    return () => carousel.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const cardWidth = carousel.clientWidth;
+    carousel.scrollTo({
+      left: currentDeliverable * cardWidth,
+      behavior: 'smooth',
+    });
+  }, [currentDeliverable]);
 
   return (
     <main className={styles.page}>
@@ -163,14 +223,18 @@ export function LipedemaClient() {
           É um <strong>distúrbio inflamatório</strong>, agravado por <strong>desequilíbrios hormonais</strong>. Por isso, a gordura nas pernas não cede.
         </p>
 
-        <div className={styles.causesGrid}>
+        <div className={styles.causesSteps}>
           {causes.map((cause, index) => (
-            <div key={index} className={styles.causeCard}>
-              <div className={styles.causeIcon}>{cause.icon}</div>
-              <h4>{cause.title}</h4>
-              <p>{cause.description}</p>
-              <div className={styles.cardShine}></div>
-            </div>
+            <article key={index} className={styles.causeStep}>
+              <div className={styles.stepNumber}>
+                <span>{String(index + 1).padStart(2, '0')}</span>
+              </div>
+              <div className={styles.stepContent}>
+                <h4>{cause.title}</h4>
+                <p>{cause.description}</p>
+              </div>
+              {index < causes.length - 1 && <div className={styles.stepConnector} />}
+            </article>
           ))}
         </div>
 
@@ -195,81 +259,61 @@ export function LipedemaClient() {
         </h2>
         
         <div className={styles.cardsGrid}>
-          <article className={styles.deliverableCard}>
-            <div className={styles.cardIcon}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <h3>Consulta individual com Dr. Fernando</h3>
-            <ul>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Análise corporal (3D ou online com IA)</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Investigação hormonal completa</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Mapeamento alimentar/emocional</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Plano inicial aplicável</span>
-              </li>
-            </ul>
-          </article>
-
-          <article className={styles.deliverableCard}>
-            <div className={styles.cardIcon}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-            <h3>Acompanhamento estratégico</h3>
-            <ul>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Consultas quinzenais com o Dr. Fernando</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Dieta FMD adaptada para Lipedema</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Suporte semanal com nutricionista</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Canal VIP com o time</span>
-              </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>Terapias injetáveis (se indicado)</span>
-              </li>
-            </ul>
-          </article>
+          {deliverables.map((deliverable, index) => (
+            <article key={index} className={styles.deliverableCard}>
+              <div className={styles.cardIcon}>{deliverable.icon}</div>
+              <h3>{deliverable.title}</h3>
+              <ul>
+                {deliverable.items.map((item, itemIndex) => (
+                  <li key={itemIndex}>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                    </svg>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+        
+        {/* Carousel Mobile */}
+        <div className={styles.deliverablesCarouselWrapper}>
+          <div
+            ref={carouselRef}
+            className={styles.deliverablesCarousel}
+          >
+            {deliverables.map((deliverable, index) => (
+              <article
+                key={index}
+                className={`${styles.deliverableCard} ${styles.deliverableCardCarousel}`}
+              >
+                <div className={styles.cardIcon}>{deliverable.icon}</div>
+                <h3>{deliverable.title}</h3>
+                <ul>
+                  {deliverable.items.map((item, itemIndex) => (
+                    <li key={itemIndex}>
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                      </svg>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
+          
+          <div className={styles.carouselDots}>
+            {deliverables.map((_, index) => (
+              <button
+                key={index}
+                className={`${styles.dot} ${index === currentDeliverable ? styles.activeDot : ''}`}
+                onClick={() => setCurrentDeliverable(index)}
+                aria-label={`Ir para card ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
