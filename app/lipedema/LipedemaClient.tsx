@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useEffect, useState, useRef } from 'react';
 import { useWhatsappLink } from '../hooks/useWhatsappLink';
 import { VTurbPlayerLipedema } from './VTurbPlayerLipedema';
-import { YouTubeShort } from './YouTubeShort';
 import styles from './page.module.css';
 
 export function LipedemaClient() {
@@ -159,6 +158,7 @@ export function LipedemaClient() {
               height={800}
               className={styles.galleryImage}
               priority
+              unoptimized
             />
           </div>
           <div className={styles.galleryItem}>
@@ -168,6 +168,7 @@ export function LipedemaClient() {
               width={600}
               height={800}
               className={styles.galleryImage}
+              unoptimized
             />
           </div>
           <div className={styles.galleryItem}>
@@ -177,6 +178,7 @@ export function LipedemaClient() {
               width={600}
               height={800}
               className={styles.galleryImage}
+              unoptimized
             />
           </div>
         </div>
@@ -195,6 +197,7 @@ export function LipedemaClient() {
                 height={800}
                 className={styles.galleryImage}
                 priority
+                unoptimized
               />
             </div>
             <div className={styles.galleryItemCarousel}>
@@ -204,6 +207,7 @@ export function LipedemaClient() {
                 width={600}
                 height={800}
                 className={styles.galleryImage}
+                unoptimized
               />
             </div>
             <div className={styles.galleryItemCarousel}>
@@ -213,6 +217,7 @@ export function LipedemaClient() {
                 width={600}
                 height={800}
                 className={styles.galleryImage}
+                unoptimized
               />
             </div>
           </div>
@@ -228,19 +233,6 @@ export function LipedemaClient() {
             ))}
           </div>
         </div>
-      </section>
-
-      {/* YouTube Video Section */}
-      <section className={`${styles.section} ${styles.youtubeVideo}`}>
-        <h2 className={styles.sectionTitle}>
-          Veja o <span className={styles.highlight}>depoimento completo</span>
-          <br />
-          da mesma pessoa das fotos acima
-        </h2>
-        <p className={styles.description}>
-          As imagens que você viu são da mesma paciente que conta sua <strong>transformação completa</strong> neste vídeo.
-        </p>
-        <YouTubeShort videoId="SnvZPbaG9dQ" />
       </section>
 
       {/* Hero Section */}
