@@ -3,20 +3,19 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState, useRef } from 'react';
-import { useWhatsappLink } from '../hooks/useWhatsappLink';
+import { usePageView } from '../hooks/usePageView';
+import { links } from '../../config/links';
 import { VTurbPlayerLipedema } from './VTurbPlayerLipedema';
 import { VTurbPlayerResults } from './VTurbPlayerResults';
 import styles from './page.module.css';
 
 export function LipedemaClient() {
+  usePageView();
   const [currentDeliverable, setCurrentDeliverable] = useState(0);
   const [currentGalleryImage, setCurrentGalleryImage] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const galleryCarouselRef = useRef<HTMLDivElement>(null);
-  const whatsappLink = useWhatsappLink(
-    'Olá! Quero falar com a equipe do Dr. Fernando.',
-    'Olá! Acabei de fazer o quiz e recebi indícios de Lipedema. Preciso de orientação personalizada.'
-  );
+  const ctaLink = links.lipedema;
 
   const causes = [
     { title: 'Estrogênio em excesso', description: 'Desequilíbrio hormonal' },
@@ -126,7 +125,7 @@ export function LipedemaClient() {
         <p className={styles.supportText}>
           Mulheres com lipedema <span className={styles.highlight}>não falham</span> nas dietas. As dietas é que <span className={styles.highlight}>falham com elas.</span>
         </p>
-        <Link className={styles.ctaPrimary} href={whatsappLink} target="_blank" rel="noopener noreferrer">
+        <Link className={styles.ctaPrimary} href={ctaLink} target="_blank" rel="noopener noreferrer" data-append-utms="true">
           <div className={styles.ctaBadge}>⚡ RESPOSTA EM MINUTOS</div>
           <div className={styles.ctaContent}>
             <svg viewBox="0 0 24 24" fill="currentColor">
@@ -372,7 +371,7 @@ export function LipedemaClient() {
           Quando você <span className={styles.highlight}>trata a causa</span>, o volume <span className={styles.highlight}>responde.</span>
         </p>
 
-        <Link className={styles.ctaSecondary} href={whatsappLink} target="_blank" rel="noopener noreferrer">
+        <Link className={styles.ctaSecondary} href={ctaLink} target="_blank" rel="noopener noreferrer">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -458,7 +457,7 @@ export function LipedemaClient() {
           Força de vontade não vence desequilíbrio hormonal. Mas existe <strong>diagnóstico</strong>. <strong>Estratégia</strong>. <strong>Resultado</strong>.
         </p>
         
-        <Link className={styles.ctaPrimary} href={whatsappLink} target="_blank" rel="noopener noreferrer">
+        <Link className={styles.ctaPrimary} href={ctaLink} target="_blank" rel="noopener noreferrer" data-append-utms="true">
           <div className={styles.ctaBadge}>⚡ RESPOSTA EM MINUTOS</div>
           <div className={styles.ctaContent}>
             <svg viewBox="0 0 24 24" fill="currentColor">
