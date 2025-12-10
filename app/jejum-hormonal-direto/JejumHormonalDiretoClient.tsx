@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState, useRef } from 'react';
-import { useWhatsappLink } from '../hooks/useWhatsappLink';
 import { usePageView } from '../hooks/usePageView';
+import { links } from '../../config/links';
 import { VTurbPlayerJejum } from './VTurbPlayerJejum';
 import { VTurbPlayerJejum1 } from './VTurbPlayerJejum1';
 import { VTurbPlayerJejum2 } from './VTurbPlayerJejum2';
@@ -17,9 +17,7 @@ export function JejumHormonalDiretoClient() {
   const [currentVideo, setCurrentVideo] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const videosCarouselRef = useRef<HTMLDivElement>(null);
-  const whatsappLink = useWhatsappLink(
-    'Olá! Quero falar com a equipe do Dr. Fernando sobre o Jejum Hormonal. Quero saber como funciona.'
-  );
+  const ctaLink = links.jejumHormonalDireto;
 
   const benefits = [
     {
@@ -159,7 +157,7 @@ export function JejumHormonalDiretoClient() {
         <p className={styles.supportText}>
           Descubra o protocolo clínico que já ajudou <span className={styles.highlight}>mais de 10 mil mulheres</span> a voltarem a emagrecer — mesmo após os 40.
         </p>
-        <Link className={styles.ctaPrimary} href={whatsappLink} target="_blank" rel="noopener noreferrer" data-append-utms="true">
+        <Link className={styles.ctaPrimary} href={ctaLink} target="_blank" rel="noopener noreferrer" data-append-utms="true">
           <div className={styles.ctaBadge}>⚡ RESPOSTA EM MINUTOS</div>
           <div className={styles.ctaContent}>
           <svg viewBox="0 0 24 24" fill="currentColor">
@@ -401,7 +399,7 @@ export function JejumHormonalDiretoClient() {
 
       {/* Final CTA Section */}
       <section className={`${styles.section} ${styles.finalCta}`}>
-        <Link className={styles.ctaPrimary} href={whatsappLink} target="_blank" rel="noopener noreferrer" data-append-utms="true">
+        <Link className={styles.ctaPrimary} href={ctaLink} target="_blank" rel="noopener noreferrer" data-append-utms="true">
           <div className={styles.ctaBadge}>⚡ RESPOSTA EM MINUTOS</div>
           <div className={styles.ctaContent}>
             <svg viewBox="0 0 24 24" fill="currentColor">

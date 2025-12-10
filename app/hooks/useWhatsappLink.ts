@@ -23,7 +23,9 @@ function sanitizeMessage(message: string): string {
 }
 
 function buildMessage(defaultMessage: string, contextMessage: string | undefined, payload?: QuizSummaryPayload) {
-  const base = sanitizeMessage(contextMessage ?? defaultMessage);
+  // Se houver contextMessage, sempre usar ele como base (mesmo sem payload)
+  // Se não houver contextMessage, usar defaultMessage
+  const base = sanitizeMessage(contextMessage || defaultMessage);
 
   if (!payload) {
     return base;
