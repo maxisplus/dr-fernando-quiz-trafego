@@ -4,11 +4,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState, useRef } from 'react';
 import { useWhatsappLink } from '../hooks/useWhatsappLink';
+import { usePageView } from '../hooks/usePageView';
 import { VTurbPlayerLipedema } from './VTurbPlayerLipedema';
 import { VTurbPlayerResults } from './VTurbPlayerResults';
 import styles from './page.module.css';
 
 export function LipedemaClient() {
+  usePageView();
   const [currentDeliverable, setCurrentDeliverable] = useState(0);
   const [currentGalleryImage, setCurrentGalleryImage] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -126,7 +128,7 @@ export function LipedemaClient() {
         <p className={styles.supportText}>
           Mulheres com lipedema <span className={styles.highlight}>não falham</span> nas dietas. As dietas é que <span className={styles.highlight}>falham com elas.</span>
         </p>
-        <Link className={styles.ctaPrimary} href={whatsappLink} target="_blank" rel="noopener noreferrer">
+        <Link className={styles.ctaPrimary} href={whatsappLink} target="_blank" rel="noopener noreferrer" data-append-utms="true">
           <div className={styles.ctaBadge}>⚡ RESPOSTA EM MINUTOS</div>
           <div className={styles.ctaContent}>
             <svg viewBox="0 0 24 24" fill="currentColor">
@@ -458,7 +460,7 @@ export function LipedemaClient() {
           Força de vontade não vence desequilíbrio hormonal. Mas existe <strong>diagnóstico</strong>. <strong>Estratégia</strong>. <strong>Resultado</strong>.
         </p>
         
-        <Link className={styles.ctaPrimary} href={whatsappLink} target="_blank" rel="noopener noreferrer">
+        <Link className={styles.ctaPrimary} href={whatsappLink} target="_blank" rel="noopener noreferrer" data-append-utms="true">
           <div className={styles.ctaBadge}>⚡ RESPOSTA EM MINUTOS</div>
           <div className={styles.ctaContent}>
             <svg viewBox="0 0 24 24" fill="currentColor">

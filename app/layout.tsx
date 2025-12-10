@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import { Inter } from 'next/font/google';
+import { UTMsProvider } from './components/UTMsProvider';
 import './globals.css';
 
 const inter = Inter({
@@ -52,7 +53,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             alt=""
           />
         </noscript>
-        {children}
+        <UTMsProvider>
+          {children}
+        </UTMsProvider>
       </body>
     </html>
   );

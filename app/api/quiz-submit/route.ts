@@ -11,6 +11,14 @@ interface QuizSubmitPayload {
   variationKey: string;
   variationUtm: string;
   timestamp: string;
+  // Campos de UTM
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_term?: string;
+  utm_content?: string;
+  fbclid?: string;
+  gclid?: string;
 }
 
 // Função auxiliar para obter o ID da aba
@@ -106,17 +114,46 @@ export async function POST(request: NextRequest) {
     const sheets = google.sheets({ version: 'v4', auth });
     console.log('✅ Cliente Sheets criado');
 
-    // Nome da aba
+    // Nome das abas
     const SHEET_NAME = 'Quiz Responses';
+    const RESUMOS_SHEET_NAME = 'Quiz Resumos';
+    
+    // Cabeçalhos esperados (sem Resumo - será em aba separada)
+    const EXPECTED_HEADERS = [
+      'Timestamp',
+      'Nome',
+      'Email',
+      'Telefone',
+      'Resultado',
+      'Tipo Resultado',
+      'Variação',
+      'UTM Source',
+      'UTM Medium',
+      'UTM Campaign',
+      'UTM Term',
+      'UTM Content',
+      'FB Click ID',
+      'Google Click ID'
+    ];
+    
+    // Cabeçalhos da aba de resumos
+    const RESUMOS_HEADERS = [
+      'Timestamp',
+      'Email',
+      'Nome',
+      'Resumo'
+    ];
 
     // Verificar se a aba existe, se não, criar
     console.log(`📋 Verificando se a aba "${SHEET_NAME}" existe...`);
+    let sheetExists = false;
     try {
       await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range: `${SHEET_NAME}!A1`,
       });
       console.log('✅ Aba já existe');
+      sheetExists = true;
     } catch (error: any) {
       console.log('⚠️ Aba não existe, criando...', error.message);
       // Criar a aba se não existir
@@ -134,24 +171,101 @@ export async function POST(request: NextRequest) {
           ],
         },
       });
+      sheetExists = true;
+    }
 
-      // Adicionar cabeçalhos
+    // Verificar e atualizar cabeçalhos se necessário
+    if (sheetExists) {
+      try {
+        // Buscar cabeçalhos atuais
+        const headersResponse = await sheets.spreadsheets.values.get({
+          spreadsheetId: SPREADSHEET_ID,
+          range: `${SHEET_NAME}!A1:Z1`,
+        });
+        
+        const currentHeaders = headersResponse.data.values?.[0] || [];
+        console.log('📋 Cabeçalhos atuais:', currentHeaders);
+        console.log('📋 Cabeçalhos esperados:', EXPECTED_HEADERS);
+        
+        // Verificar se os cabeçalhos estão exatamente corretos
+        // Comparar apenas as primeiras 14 colunas (A-N) para evitar problemas com colunas extras
+        const currentHeadersTrimmed = currentHeaders.slice(0, EXPECTED_HEADERS.length);
+        const needsUpdate = currentHeadersTrimmed.length !== EXPECTED_HEADERS.length || 
+                           !EXPECTED_HEADERS.every((header, index) => currentHeadersTrimmed[index] === header);
+        
+        if (needsUpdate) {
+          console.log('⚠️ Cabeçalhos incorretos ou incompletos, atualizando...');
+          // Limpar colunas extras primeiro (se houver mais de 14 colunas)
+          if (currentHeaders.length > EXPECTED_HEADERS.length) {
+            console.log(`⚠️ Detectadas ${currentHeaders.length} colunas, limpando colunas extras (O em diante)...`);
+          // Limpar colunas O em diante (coluna 15+)
+            await sheets.spreadsheets.values.clear({
+              spreadsheetId: SPREADSHEET_ID,
+              range: `${SHEET_NAME}!O1:Z1`,
+            });
+          }
+          // Atualizar cabeçalhos exatamente como esperado (14 colunas: A-N)
+          await sheets.spreadsheets.values.update({
+            spreadsheetId: SPREADSHEET_ID,
+            range: `${SHEET_NAME}!A1:N1`,
+            valueInputOption: 'RAW',
+            requestBody: {
+              values: [EXPECTED_HEADERS],
+            },
+          });
+          console.log('✅ Cabeçalhos atualizados com sucesso!');
+          
+          // Formatar cabeçalhos em negrito
+          const sheetId = await getSheetId(sheets, SPREADSHEET_ID, SHEET_NAME);
+          if (sheetId) {
+            await sheets.spreadsheets.batchUpdate({
+              spreadsheetId: SPREADSHEET_ID,
+              requestBody: {
+                requests: [
+                  {
+                    repeatCell: {
+                      range: {
+                        sheetId: sheetId,
+                        startRowIndex: 0,
+                        endRowIndex: 1,
+                      },
+                      cell: {
+                        userEnteredFormat: {
+                          textFormat: {
+                            bold: true,
+                          },
+                        },
+                      },
+                      fields: 'userEnteredFormat.textFormat.bold',
+                    },
+                  },
+                ],
+              },
+            });
+          }
+        } else {
+          console.log('✅ Cabeçalhos já estão completos');
+        }
+      } catch (error: any) {
+        console.log('⚠️ Erro ao verificar cabeçalhos, tentando criar...', error.message);
+        // Se der erro, tentar criar os cabeçalhos
+        await sheets.spreadsheets.values.update({
+          spreadsheetId: SPREADSHEET_ID,
+          range: `${SHEET_NAME}!A1:N1`,
+          valueInputOption: 'RAW',
+          requestBody: {
+            values: [EXPECTED_HEADERS],
+          },
+        });
+      }
+    } else {
+      // Se acabou de criar a aba, adicionar cabeçalhos
       await sheets.spreadsheets.values.update({
         spreadsheetId: SPREADSHEET_ID,
-        range: `${SHEET_NAME}!A1:I1`,
+        range: `${SHEET_NAME}!A1:N1`,
         valueInputOption: 'RAW',
         requestBody: {
-          values: [[
-            'Timestamp',
-            'Nome',
-            'Email',
-            'Telefone',
-            'Resultado',
-            'Tipo Resultado',
-            'Variação',
-            'Variação Key',
-            'Resumo'
-          ]],
+          values: [EXPECTED_HEADERS],
         },
       });
 
@@ -185,7 +299,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Preparar dados para inserir
+    // Preparar dados para inserir (sem Resumo - será em aba separada)
     const row = [
       new Date().toLocaleString('pt-BR'),
       body.name,
@@ -194,12 +308,160 @@ export async function POST(request: NextRequest) {
       body.resultLabel,
       body.resultType,
       body.variationUtm,
-      body.variationKey,
+      // Adicionar UTMs
+      body.utm_source || '',
+      body.utm_medium || '',
+      body.utm_campaign || '',
+      body.utm_term || '',
+      body.utm_content || '',
+      body.fbclid || '',
+      body.gclid || '',
+    ];
+    
+    // Preparar dados do resumo para aba separada
+    const resumoRow = [
+      new Date().toLocaleString('pt-BR'),
+      body.email,
+      body.name,
       body.summary.join(' | '),
     ];
 
-    // Adicionar linha na planilha
-    console.log('📝 Adicionando dados na planilha...');
+    // Criar/verificar aba de resumos
+    console.log(`📋 Verificando se a aba "${RESUMOS_SHEET_NAME}" existe...`);
+    let resumosSheetExists = false;
+    try {
+      await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${RESUMOS_SHEET_NAME}!A1`,
+      });
+      console.log('✅ Aba de resumos já existe');
+      resumosSheetExists = true;
+    } catch (error: any) {
+      console.log('⚠️ Aba de resumos não existe, criando...', error.message);
+      // Criar a aba de resumos se não existir
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId: SPREADSHEET_ID,
+        requestBody: {
+          requests: [
+            {
+              addSheet: {
+                properties: {
+                  title: RESUMOS_SHEET_NAME,
+                },
+              },
+            },
+          ],
+        },
+      });
+      resumosSheetExists = true;
+    }
+
+    // Verificar/criar cabeçalhos da aba de resumos
+    if (resumosSheetExists) {
+      try {
+        const resumosHeadersResponse = await sheets.spreadsheets.values.get({
+          spreadsheetId: SPREADSHEET_ID,
+          range: `${RESUMOS_SHEET_NAME}!A1:Z1`,
+        });
+        const currentResumosHeaders = resumosHeadersResponse.data.values?.[0] || [];
+        const needsResumosUpdate = currentResumosHeaders.length !== RESUMOS_HEADERS.length || 
+                                  !RESUMOS_HEADERS.every((header, index) => currentResumosHeaders[index] === header);
+        
+        if (needsResumosUpdate) {
+          console.log('⚠️ Cabeçalhos da aba de resumos incorretos, atualizando...');
+          await sheets.spreadsheets.values.update({
+            spreadsheetId: SPREADSHEET_ID,
+            range: `${RESUMOS_SHEET_NAME}!A1:D1`,
+            valueInputOption: 'RAW',
+            requestBody: {
+              values: [RESUMOS_HEADERS],
+            },
+          });
+          
+          // Formatar cabeçalhos em negrito
+          const resumosSheetId = await getSheetId(sheets, SPREADSHEET_ID, RESUMOS_SHEET_NAME);
+          if (resumosSheetId) {
+            await sheets.spreadsheets.batchUpdate({
+              spreadsheetId: SPREADSHEET_ID,
+              requestBody: {
+                requests: [
+                  {
+                    repeatCell: {
+                      range: {
+                        sheetId: resumosSheetId,
+                        startRowIndex: 0,
+                        endRowIndex: 1,
+                      },
+                      cell: {
+                        userEnteredFormat: {
+                          textFormat: {
+                            bold: true,
+                          },
+                        },
+                      },
+                      fields: 'userEnteredFormat.textFormat.bold',
+                    },
+                  },
+                ],
+              },
+            });
+          }
+          console.log('✅ Cabeçalhos da aba de resumos atualizados!');
+        }
+      } catch (error: any) {
+        console.log('⚠️ Erro ao verificar cabeçalhos de resumos, criando...', error.message);
+        await sheets.spreadsheets.values.update({
+          spreadsheetId: SPREADSHEET_ID,
+          range: `${RESUMOS_SHEET_NAME}!A1:D1`,
+          valueInputOption: 'RAW',
+          requestBody: {
+            values: [RESUMOS_HEADERS],
+          },
+        });
+      }
+    } else {
+      // Se acabou de criar a aba de resumos, adicionar cabeçalhos
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${RESUMOS_SHEET_NAME}!A1:D1`,
+        valueInputOption: 'RAW',
+        requestBody: {
+          values: [RESUMOS_HEADERS],
+        },
+      });
+      
+      // Formatar cabeçalhos em negrito
+      const resumosSheetId = await getSheetId(sheets, SPREADSHEET_ID, RESUMOS_SHEET_NAME);
+      if (resumosSheetId) {
+        await sheets.spreadsheets.batchUpdate({
+          spreadsheetId: SPREADSHEET_ID,
+          requestBody: {
+            requests: [
+              {
+                repeatCell: {
+                  range: {
+                    sheetId: resumosSheetId,
+                    startRowIndex: 0,
+                    endRowIndex: 1,
+                  },
+                  cell: {
+                    userEnteredFormat: {
+                      textFormat: {
+                        bold: true,
+                      },
+                    },
+                  },
+                  fields: 'userEnteredFormat.textFormat.bold',
+                },
+              },
+            ],
+          },
+        });
+      }
+    }
+
+    // Adicionar linha na planilha principal
+    console.log('📝 Adicionando dados na planilha principal...');
     console.log('📊 Spreadsheet ID:', SPREADSHEET_ID);
     console.log('📋 Sheet Name:', SHEET_NAME);
     console.log('📄 Dados:', row);
@@ -207,15 +469,29 @@ export async function POST(request: NextRequest) {
     try {
       const appendResponse = await sheets.spreadsheets.values.append({
         spreadsheetId: SPREADSHEET_ID,
-        range: `${SHEET_NAME}!A:I`,
+        range: `${SHEET_NAME}!A:N`,
         valueInputOption: 'RAW',
         requestBody: {
           values: [row],
         },
       });
       
+      console.log('✅ Dados salvos na planilha principal!');
+      
+      // Adicionar resumo na aba separada
+      console.log('📝 Adicionando resumo na aba separada...');
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${RESUMOS_SHEET_NAME}!A:D`,
+        valueInputOption: 'RAW',
+        requestBody: {
+          values: [resumoRow],
+        },
+      });
+      
+      console.log('✅ Resumo salvo na aba separada!');
       console.log('✅ Resposta do Google Sheets:', JSON.stringify(appendResponse.data, null, 2));
-      console.log('✅ Dados salvos com sucesso na planilha!');
+      console.log('✅ Todos os dados salvos com sucesso!');
       
       return NextResponse.json({ 
         success: true, 

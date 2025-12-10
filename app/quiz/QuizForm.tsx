@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { appendUTMsToUrl, getUTMs } from '../../utils/utms';
 import styles from './quiz.module.css';
 import { getQuizVariation, QuizVariationKey } from './quizConfig';
 
@@ -255,6 +256,11 @@ export function QuizForm({ variationKey }: QuizFormProps) {
       try {
         setIsSubmitting(true);
         const summary = buildAnswerSummary(answers);
+        
+        // Capturar UTMs da URL atual
+        const utms = getUTMs();
+        const utmParams = new URLSearchParams(utms.startsWith('?') ? utms.substring(1) : utms);
+        
         const payload = {
           name: contactData.name,
           email: contactData.email,
@@ -265,6 +271,14 @@ export function QuizForm({ variationKey }: QuizFormProps) {
           variationKey,
           variationUtm: variation.utmValue,
           timestamp: new Date().toISOString(),
+          // Adicionar UTMs individuais
+          utm_source: utmParams.get('utm_source') || '',
+          utm_medium: utmParams.get('utm_medium') || '',
+          utm_campaign: utmParams.get('utm_campaign') || '',
+          utm_term: utmParams.get('utm_term') || '',
+          utm_content: utmParams.get('utm_content') || '',
+          fbclid: utmParams.get('fbclid') || '',
+          gclid: utmParams.get('gclid') || '',
         };
 
         console.log('📤 Enviando dados para Google Sheets...', payload);
@@ -336,15 +350,16 @@ export function QuizForm({ variationKey }: QuizFormProps) {
 
     // Redireciona após um pequeno delay para mostrar a mensagem
     const redirectTimer = setTimeout(() => {
-      const url = calculatedResultType === 'triad' 
+      const baseUrl = calculatedResultType === 'triad' 
         ? `/jejum-hormonal?var=${variation.utmValue}`
         : `/lipedema?var=${variation.utmValue}`;
       
-      router.push(url);
+      const urlWithUTMs = appendUTMsToUrl(baseUrl);
+      window.location.href = urlWithUTMs;
     }, 1000);
 
     return () => clearTimeout(redirectTimer);
-  }, [showResult, answers, router, variation.utmValue]);
+  }, [showResult, answers, variation.utmValue]);
 
   const handleNext = async () => {
     // Se está no step de contato, processa o resultado
