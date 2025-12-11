@@ -52,6 +52,25 @@ interface ConversationCache {
 }
 
 /**
+ * Função auxiliar para obter o ID da aba
+ */
+async function getSheetId(
+  sheets: any,
+  spreadsheetId: string,
+  sheetName: string
+): Promise<number> {
+  try {
+    const response = await sheets.spreadsheets.get({
+      spreadsheetId,
+    });
+    const sheet = response.data.sheets?.find((s: any) => s.properties?.title === sheetName);
+    return sheet?.properties?.sheetId || 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
  * Mapeamento de link_id para funnel
  */
 const FUNNEL_MAP: Record<string, string> = {
@@ -140,6 +159,16 @@ async function saveLeadToSheet(data: {
   gclid?: string;
   status?: string;
 }) {
+  console.log('🚀 saveLeadToSheet chamada com dados:', {
+    timestamp: data.timestamp,
+    name: data.name,
+    phone: data.phone,
+    messageLength: data.message?.length || 0,
+    funnel: data.funnel,
+    linkId: data.linkId,
+    status: data.status,
+  });
+  
   try {
     const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
     const SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -160,19 +189,49 @@ async function saveLeadToSheet(data: {
       return { success: false, error: `Configuração faltando: ${missing.join(', ')}` };
     }
 
-    // Processar chave privada
+    // Processar chave privada - lidar com diferentes formatos
     if (PRIVATE_KEY) {
+      // Se a chave contém \n literal (string), substituir por quebra de linha real
       PRIVATE_KEY = PRIVATE_KEY.replace(/\\n/g, '\n');
+      
+      // Se a chave não começa com -----BEGIN, pode estar faltando quebras de linha
+      if (!PRIVATE_KEY.includes('-----BEGIN PRIVATE KEY-----')) {
+        console.error('❌ Formato de chave privada inválido');
+        return { 
+          success: false, 
+          error: 'Formato de chave privada inválido' 
+        };
+      }
     }
 
+    console.log('✅ Variáveis de ambiente configuradas');
+
     // Autenticar com Service Account
+    console.log('🔐 Autenticando com Google Sheets API...');
+    console.log('📧 Service Account:', SERVICE_ACCOUNT_EMAIL);
+    console.log('📊 Spreadsheet ID:', SPREADSHEET_ID);
+    
     const auth = new google.auth.JWT({
       email: SERVICE_ACCOUNT_EMAIL,
       key: PRIVATE_KEY,
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
 
+    // Testar autenticação
+    try {
+      const token = await auth.getAccessToken();
+      console.log('✅ Token obtido com sucesso');
+    } catch (authError: any) {
+      console.error('❌ ERRO NA AUTENTICAÇÃO:', authError.message);
+      console.error('Código:', authError.code);
+      return { 
+        success: false, 
+        error: `Falha na autenticação: ${authError.message}` 
+      };
+    }
+
     const sheets = google.sheets({ version: 'v4', auth });
+    console.log('✅ Cliente Sheets criado');
 
     const SHEET_NAME = 'Leads Qualificados';
 
@@ -195,15 +254,18 @@ async function saveLeadToSheet(data: {
     ];
 
     // Verificar se a aba existe, se não, criar
+    console.log(`📋 Verificando se a aba "${SHEET_NAME}" existe...`);
     let sheetExists = false;
     try {
       await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range: `${SHEET_NAME}!A1`,
       });
+      console.log('✅ Aba já existe');
       sheetExists = true;
     } catch (error: any) {
-      // Aba não existe, criar
+      console.log('⚠️ Aba não existe, criando...', error.message);
+      // Criar a aba se não existir
       await sheets.spreadsheets.batchUpdate({
         spreadsheetId: SPREADSHEET_ID,
         requestBody: {
@@ -229,17 +291,29 @@ async function saveLeadToSheet(data: {
           spreadsheetId: SPREADSHEET_ID,
           range: `${SHEET_NAME}!A1:Z1`,
         });
-
+        
         const currentHeaders = headersResponse.data.values?.[0] || [];
-
-        // Verificar se os cabeçalhos estão corretos
-        const headersMatch = 
-          currentHeaders.length === EXPECTED_HEADERS.length &&
-          EXPECTED_HEADERS.every((header, index) => currentHeaders[index] === header);
-
-        if (!headersMatch) {
-          console.log('📋 Atualizando cabeçalhos da planilha...');
-          // Atualizar cabeçalhos
+        console.log('📋 Cabeçalhos atuais:', currentHeaders);
+        console.log('📋 Cabeçalhos esperados:', EXPECTED_HEADERS);
+        
+        // Verificar se os cabeçalhos estão exatamente corretos
+        // Comparar apenas as primeiras colunas para evitar problemas com colunas extras
+        const currentHeadersTrimmed = currentHeaders.slice(0, EXPECTED_HEADERS.length);
+        const needsUpdate = currentHeadersTrimmed.length !== EXPECTED_HEADERS.length || 
+                           !EXPECTED_HEADERS.every((header, index) => currentHeadersTrimmed[index] === header);
+        
+        if (needsUpdate) {
+          console.log('⚠️ Cabeçalhos incorretos ou incompletos, atualizando...');
+          // Limpar colunas extras primeiro (se houver mais colunas que o esperado)
+          if (currentHeaders.length > EXPECTED_HEADERS.length) {
+            console.log(`⚠️ Detectadas ${currentHeaders.length} colunas, limpando colunas extras (P em diante)...`);
+            // Limpar colunas P em diante (coluna 16+)
+            await sheets.spreadsheets.values.clear({
+              spreadsheetId: SPREADSHEET_ID,
+              range: `${SHEET_NAME}!P1:Z1`,
+            });
+          }
+          // Atualizar cabeçalhos exatamente como esperado (14 colunas: A-O)
           await sheets.spreadsheets.values.update({
             spreadsheetId: SPREADSHEET_ID,
             range: `${SHEET_NAME}!A1:O1`,
@@ -248,23 +322,118 @@ async function saveLeadToSheet(data: {
               values: [EXPECTED_HEADERS],
             },
           });
-          console.log('✅ Cabeçalhos atualizados');
+          console.log('✅ Cabeçalhos atualizados com sucesso!');
+          
+          // Formatar cabeçalhos em negrito
+          const sheetId = await getSheetId(sheets, SPREADSHEET_ID, SHEET_NAME);
+          if (sheetId) {
+            await sheets.spreadsheets.batchUpdate({
+              spreadsheetId: SPREADSHEET_ID,
+              requestBody: {
+                requests: [
+                  {
+                    repeatCell: {
+                      range: {
+                        sheetId: sheetId,
+                        startRowIndex: 0,
+                        endRowIndex: 1,
+                      },
+                      cell: {
+                        userEnteredFormat: {
+                          textFormat: {
+                            bold: true,
+                          },
+                        },
+                      },
+                      fields: 'userEnteredFormat.textFormat.bold',
+                    },
+                  },
+                ],
+              },
+            });
+          }
+        } else {
+          console.log('✅ Cabeçalhos já estão completos');
         }
-      } catch (error) {
-        console.error('❌ Erro ao verificar/atualizar cabeçalhos:', error);
-        // Se der erro, tentar criar cabeçalhos mesmo assim
-        try {
-          await sheets.spreadsheets.values.update({
+      } catch (error: any) {
+        console.log('⚠️ Erro ao verificar cabeçalhos, tentando criar...', error.message);
+        // Se der erro, tentar criar os cabeçalhos
+        await sheets.spreadsheets.values.update({
+          spreadsheetId: SPREADSHEET_ID,
+          range: `${SHEET_NAME}!A1:O1`,
+          valueInputOption: 'RAW',
+          requestBody: {
+            values: [EXPECTED_HEADERS],
+          },
+        });
+        
+        // Formatar cabeçalhos em negrito
+        const sheetId = await getSheetId(sheets, SPREADSHEET_ID, SHEET_NAME);
+        if (sheetId) {
+          await sheets.spreadsheets.batchUpdate({
             spreadsheetId: SPREADSHEET_ID,
-            range: `${SHEET_NAME}!A1:O1`,
-            valueInputOption: 'RAW',
             requestBody: {
-              values: [EXPECTED_HEADERS],
+              requests: [
+                {
+                  repeatCell: {
+                    range: {
+                      sheetId: sheetId,
+                      startRowIndex: 0,
+                      endRowIndex: 1,
+                    },
+                    cell: {
+                      userEnteredFormat: {
+                        textFormat: {
+                          bold: true,
+                        },
+                      },
+                    },
+                    fields: 'userEnteredFormat.textFormat.bold',
+                  },
+                },
+              ],
             },
           });
-        } catch (createError) {
-          console.error('❌ Erro ao criar cabeçalhos:', createError);
         }
+      }
+    } else {
+      // Se acabou de criar a aba, adicionar cabeçalhos
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${SHEET_NAME}!A1:O1`,
+        valueInputOption: 'RAW',
+        requestBody: {
+          values: [EXPECTED_HEADERS],
+        },
+      });
+
+      // Formatar cabeçalhos em negrito
+      const sheetId = await getSheetId(sheets, SPREADSHEET_ID, SHEET_NAME);
+      if (sheetId) {
+        await sheets.spreadsheets.batchUpdate({
+          spreadsheetId: SPREADSHEET_ID,
+          requestBody: {
+            requests: [
+              {
+                repeatCell: {
+                  range: {
+                    sheetId: sheetId,
+                    startRowIndex: 0,
+                    endRowIndex: 1,
+                  },
+                  cell: {
+                    userEnteredFormat: {
+                      textFormat: {
+                        bold: true,
+                      },
+                    },
+                  },
+                  fields: 'userEnteredFormat.textFormat.bold',
+                },
+              },
+            ],
+          },
+        });
       }
     }
 
@@ -286,29 +455,56 @@ async function saveLeadToSheet(data: {
       data.gclid || '',
     ];
 
-    // Inserir dados
-    console.log('📝 Inserindo linha na planilha...');
-    console.log('📋 Range:', `${SHEET_NAME}!A:O`);
-    console.log('📋 Row preview:', row.slice(0, 7).join(' | '));
-    
-    const appendResult = await sheets.spreadsheets.values.append({
-      spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A:O`,
-      valueInputOption: 'RAW',
-      requestBody: {
-        values: [row],
-      },
-    });
+    // Adicionar linha na planilha
+    console.log('📝 Adicionando dados na planilha...');
+    console.log('📊 Spreadsheet ID:', SPREADSHEET_ID);
+    console.log('📋 Sheet Name:', SHEET_NAME);
+    console.log('📄 Dados:', row);
 
-    console.log('✅ Lead qualificado salvo no Google Sheets');
-    console.log('📋 Response:', JSON.stringify(appendResult.data, null, 2));
-    return { success: true };
+    try {
+      const appendResponse = await sheets.spreadsheets.values.append({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${SHEET_NAME}!A:O`,
+        valueInputOption: 'RAW',
+        requestBody: {
+          values: [row],
+        },
+      });
+      
+      console.log('✅ Dados salvos na planilha!');
+      console.log('✅ Resposta do Google Sheets:', JSON.stringify(appendResponse.data, null, 2));
+      console.log('✅ Lead qualificado salvo com sucesso!');
+      
+      return { 
+        success: true, 
+        message: 'Lead qualificado salvo com sucesso',
+        updatedRange: appendResponse.data.updates?.updatedRange 
+      };
+    } catch (appendError: any) {
+      console.error('❌ ERRO AO SALVAR NA PLANILHA:');
+      console.error('Mensagem:', appendError.message);
+      console.error('Código:', appendError.code);
+      console.error('Detalhes:', appendError.response?.data);
+      
+      // Erro específico de permissão
+      if (appendError.code === 403 || appendError.message?.includes('permission')) {
+        throw new Error(`ERRO DE PERMISSÃO: A planilha não foi compartilhada com ${SERVICE_ACCOUNT_EMAIL}. Compartilhe a planilha com este email e dê permissão de Editor.`);
+      }
+      
+      // Erro de planilha não encontrada
+      if (appendError.code === 404) {
+        throw new Error(`PLANILHA NÃO ENCONTRADA: Verifique se o ID da planilha está correto: ${SPREADSHEET_ID}`);
+      }
+      
+      throw appendError;
+    }
   } catch (error: any) {
-    console.error('❌ Erro ao salvar lead no Google Sheets:');
-    console.error('📋 Error message:', error.message);
-    console.error('📋 Error code:', error.code);
-    console.error('📋 Error response:', error.response?.data);
-    console.error('📋 Stack trace:', error.stack);
+    console.error('❌ Erro ao processar salvamento do lead:', error);
+    console.error('Detalhes do erro:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
     return { 
       success: false, 
       error: error.message,
@@ -477,6 +673,7 @@ async function processWebhook(body: TintimWebhookPayload) {
     // Armazenar no cache para usar quando chegar a mensagem
     if (phone && !messageText && !isMessageSent) {
       console.log('💾 Webhook de Criação de Conversa - armazenando dados no cache');
+      console.log('📋 Dados do cache:', { phone, name, linkId, hasUtms: !!(utms.utm_source || utms.utm_medium) });
       conversationCache.set(cacheKey, {
         phone,
         name,
@@ -485,6 +682,7 @@ async function processWebhook(body: TintimWebhookPayload) {
         timestamp: Date.now(),
       });
       console.log(`✅ Dados de conversa armazenados no cache (chave: ${cacheKey})`);
+      console.log('⚠️ Retornando - aguardando mensagem para processar');
       return; // Não processar ainda, esperar pela mensagem
     }
 
@@ -603,6 +801,7 @@ async function processWebhook(body: TintimWebhookPayload) {
     if (!isMessageSent && !messageText) {
       console.log('⚠️ Webhook ignorado: sem mensagem para processar');
       console.log('📋 Dados extraídos:', { phone, name, linkId, hasMessage: !!messageText, isMessageSent });
+      console.log('⚠️ Retornando - sem mensagem para processar');
       return;
     }
 
@@ -627,6 +826,7 @@ async function processWebhook(body: TintimWebhookPayload) {
         console.log('📋 Dados extraídos:', { phone, name, linkId, messageText: messageText?.substring(0, 50), isMessageSent });
         console.log('📋 Chave de cache:', cacheKey);
         console.log('📋 Cache disponível:', Array.from(conversationCache.keys()));
+        console.log('⚠️ Retornando - telefone não encontrado');
         return;
       }
     }
@@ -637,6 +837,7 @@ async function processWebhook(body: TintimWebhookPayload) {
     // Esta verificação não deve ser necessária agora, mas mantemos como segurança
     if (!finalMessageText) {
       console.log('⚠️ Webhook ignorado: sem mensagem para processar (caso inesperado)');
+      console.log('⚠️ Retornando - finalMessageText está vazio');
       return;
     }
 
@@ -675,15 +876,28 @@ async function processWebhook(body: TintimWebhookPayload) {
     const status = isMessageSent ? 'Mensagem Enviada' : 'Mensagem Recebida';
 
     // Salvar no Google Sheets (em background)
-    const saveResult = await saveLeadToSheet({
-      ...leadData,
-      status,
-    });
-    
-    if (saveResult.success) {
-      console.log('✅ Lead salvo com sucesso no Google Sheets');
-    } else {
-      console.error('❌ Erro ao salvar lead no Google Sheets:', saveResult.error);
+    try {
+      const saveResult = await saveLeadToSheet({
+        ...leadData,
+        status,
+      });
+      
+      if (saveResult.success) {
+        console.log('✅ Lead salvo com sucesso no Google Sheets');
+        console.log('📋 Resultado:', JSON.stringify(saveResult, null, 2));
+      } else {
+        console.error('❌ Erro ao salvar lead no Google Sheets');
+        console.error('📋 Erro:', saveResult.error);
+        console.error('📋 Código:', saveResult.code);
+        console.error('📋 Detalhes:', saveResult.details);
+        // Não retornar aqui, continuar o processamento para não silenciar o erro
+      }
+    } catch (saveError: any) {
+      console.error('❌ EXCEÇÃO ao salvar lead no Google Sheets:');
+      console.error('📋 Mensagem:', saveError.message);
+      console.error('📋 Stack:', saveError.stack);
+      // Re-throw para que seja capturado pelo catch externo
+      throw saveError;
     }
 
     // Limpar do cache após processar
@@ -694,8 +908,13 @@ async function processWebhook(body: TintimWebhookPayload) {
 
     console.log('✅ Lead processado com sucesso:', leadData);
   } catch (error: any) {
-    console.error('❌ Erro ao processar webhook do Tintim:', error);
+    console.error('❌ Erro ao processar webhook do Tintim:');
+    console.error('📋 Mensagem:', error.message);
+    console.error('📋 Código:', error.code);
     console.error('📋 Stack trace:', error.stack);
+    console.error('📋 Erro completo:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+    // Não re-throw aqui porque o processamento é em background
+    // Mas garantir que o erro seja logado adequadamente
   }
 }
 
@@ -724,7 +943,11 @@ export async function POST(request: NextRequest) {
 
     // Processar em background (não bloquear a resposta)
     processWebhook(body).catch((error) => {
-      console.error('❌ Erro ao processar webhook em background:', error);
+      console.error('❌ Erro ao processar webhook em background:');
+      console.error('📋 Mensagem:', error?.message || 'Erro desconhecido');
+      console.error('📋 Código:', error?.code);
+      console.error('📋 Stack:', error?.stack);
+      console.error('📋 Erro completo:', JSON.stringify(error, Object.getOwnPropertyNames(error || {}), 2));
     });
 
     return response;
